@@ -1,0 +1,9 @@
+Package: iapguard-filter
+Name: IAPGuard
+Version: 1.0
+Architecture: iphoneos-arm64
+Description: StoreKit product whitelist guard
+Maintainer: local
+Author: local
+Section: Tweaks
+Depends: mobilesubstrate, firmware (>= 12.0)

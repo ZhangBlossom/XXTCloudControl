@@ -1,0 +1,110 @@
+---
+triple:          'arm64e-apple-darwin'
+binary-path:     '/Users/qzytwway/Documents/game_top_up/plugin/iapguard-filter/.theos/obj/arm64e/zzzIAPGuard.dylib'
+relocations:
+  - { offset: 0x3E, size: 0x8, addend: 0x0, symName: __ZL17IAPGuardObserversv, symObjAddr: 0x3CC, symBinAddr: 0x43CC, symSize: 0x44 }
+  - { offset: 0x67, size: 0x8, addend: 0x0, symName: __ZZL17IAPGuardObserversvE9observers, symObjAddr: 0x18720, symBinAddr: 0x10D90, symSize: 0x0 }
+  - { offset: 0x7C, size: 0x8, addend: 0x0, symName: __ZZL17IAPGuardObserversvE9onceToken, symObjAddr: 0x18728, symBinAddr: 0x10D98, symSize: 0x0 }
+  - { offset: 0x2F9, size: 0x8, addend: 0x0, symName: __ZL30IAPGuardDeniedTransactionArrayv, symObjAddr: 0x410, symBinAddr: 0x4410, symSize: 0x44 }
+  - { offset: 0x322, size: 0x8, addend: 0x0, symName: __ZZL30IAPGuardDeniedTransactionArrayvE12transactions, symObjAddr: 0x18730, symBinAddr: 0x10DA0, symSize: 0x0 }
+  - { offset: 0x337, size: 0x8, addend: 0x0, symName: __ZZL30IAPGuardDeniedTransactionArrayvE9onceToken, symObjAddr: 0x18738, symBinAddr: 0x10DA8, symSize: 0x0 }
+  - { offset: 0x36F, size: 0x8, addend: 0x0, symName: __ZL21IAPGuardProductPricesv, symObjAddr: 0x454, symBinAddr: 0x4454, symSize: 0x44 }
+  - { offset: 0x398, size: 0x8, addend: 0x0, symName: __ZZL21IAPGuardProductPricesvE6prices, symObjAddr: 0x18740, symBinAddr: 0x10DB0, symSize: 0x0 }
+  - { offset: 0x3AD, size: 0x8, addend: 0x0, symName: __ZZL21IAPGuardProductPricesvE9onceToken, symObjAddr: 0x18748, symBinAddr: 0x10DB8, symSize: 0x0 }
+  - { offset: 0x40E, size: 0x8, addend: 0x0, symName: __ZL40kIAPGuardProductsRequestDelegateProxyKey, symObjAddr: 0x3268, symBinAddr: 0x10D48, symSize: 0x0 }
+  - { offset: 0x428, size: 0x8, addend: 0x0, symName: '__ZL45_logos_orig$_ungrouped$SKRequest$setDelegate$', symObjAddr: 0x186E0, symBinAddr: 0x10D50, symSize: 0x0 }
+  - { offset: 0x49F, size: 0x8, addend: 0x0, symName: '__ZL41_logos_orig$_ungrouped$SKRequest$delegate', symObjAddr: 0x186E8, symBinAddr: 0x10D58, symSize: 0x0 }
+  - { offset: 0x4CE, size: 0x8, addend: 0x0, symName: '__ZL50_logos_orig$_ungrouped$SKProductsResponse$products', symObjAddr: 0x186F0, symBinAddr: 0x10D60, symSize: 0x0 }
+  - { offset: 0x53C, size: 0x8, addend: 0x0, symName: '__ZL61_logos_orig$_ungrouped$SKPaymentQueue$addTransactionObserver$', symObjAddr: 0x186F8, symBinAddr: 0x10D68, symSize: 0x0 }
+  - { offset: 0x5F2, size: 0x8, addend: 0x0, symName: '__ZL64_logos_orig$_ungrouped$SKPaymentQueue$removeTransactionObserver$', symObjAddr: 0x18700, symBinAddr: 0x10D70, symSize: 0x0 }
+  - { offset: 0x60C, size: 0x8, addend: 0x0, symName: '__ZL50_logos_orig$_ungrouped$SKPaymentQueue$transactions', symObjAddr: 0x18708, symBinAddr: 0x10D78, symSize: 0x0 }
+  - { offset: 0x63B, size: 0x8, addend: 0x0, symName: '__ZL49_logos_orig$_ungrouped$SKPaymentQueue$addPayment$', symObjAddr: 0x18710, symBinAddr: 0x10D80, symSize: 0x0 }
+  - { offset: 0x8D8, size: 0x8, addend: 0x0, symName: '__ZL56_logos_orig$_ungrouped$SKPaymentQueue$finishTransaction$', symObjAddr: 0x18718, symBinAddr: 0x10D88, symSize: 0x0 }
+  - { offset: 0x237C, size: 0x8, addend: 0x0, symName: '-[IAPGuardProductsRequestDelegateProxy initWithDelegate:]', symObjAddr: 0x0, symBinAddr: 0x4000, symSize: 0x84 }
+  - { offset: 0x2485, size: 0x8, addend: 0x0, symName: '-[IAPGuardProductsRequestDelegateProxy productsRequest:didReceiveResponse:]', symObjAddr: 0x84, symBinAddr: 0x4084, symSize: 0x160 }
+  - { offset: 0x2534, size: 0x8, addend: 0x0, symName: __ZL22IAPGuardRecordProductsP7NSArray, symObjAddr: 0x1464, symBinAddr: 0x5464, symSize: 0x2F0 }
+  - { offset: 0x25BD, size: 0x8, addend: 0x0, symName: '-[IAPGuardProductsRequestDelegateProxy respondsToSelector:]', symObjAddr: 0x1E4, symBinAddr: 0x41E4, symSize: 0xA4 }
+  - { offset: 0x2600, size: 0x8, addend: 0x0, symName: '-[IAPGuardProductsRequestDelegateProxy forwardingTargetForSelector:]', symObjAddr: 0x288, symBinAddr: 0x4288, symSize: 0xB8 }
+  - { offset: 0x2652, size: 0x8, addend: 0x0, symName: '-[IAPGuardProductsRequestDelegateProxy originalDelegate]', symObjAddr: 0x340, symBinAddr: 0x4340, symSize: 0x2C }
+  - { offset: 0x2686, size: 0x8, addend: 0x0, symName: '-[IAPGuardProductsRequestDelegateProxy setOriginalDelegate:]', symObjAddr: 0x36C, symBinAddr: 0x436C, symSize: 0xC }
+  - { offset: 0x26C3, size: 0x8, addend: 0x0, symName: '-[IAPGuardProductsRequestDelegateProxy .cxx_destruct]', symObjAddr: 0x378, symBinAddr: 0x4378, symSize: 0x8 }
+  - { offset: 0x26F3, size: 0x8, addend: 0x0, symName: __ZL24_logosLocalCtor_945374eciPPcS0_, symObjAddr: 0x380, symBinAddr: 0x4380, symSize: 0x4C }
+  - { offset: 0x27E7, size: 0x8, addend: 0x0, symName: __ZL17IAPGuardObserversv.cold.1, symObjAddr: 0x219C, symBinAddr: 0x8658, symSize: 0x14 }
+  - { offset: 0x2802, size: 0x8, addend: 0x0, symName: __ZL17IAPGuardObserversv.cold.1, symObjAddr: 0x219C, symBinAddr: 0x8658, symSize: 0x14 }
+  - { offset: 0x2813, size: 0x8, addend: 0x0, symName: __ZL30IAPGuardDeniedTransactionArrayv.cold.1, symObjAddr: 0x21B0, symBinAddr: 0x866C, symSize: 0x14 }
+  - { offset: 0x282E, size: 0x8, addend: 0x0, symName: __ZL30IAPGuardDeniedTransactionArrayv.cold.1, symObjAddr: 0x21B0, symBinAddr: 0x866C, symSize: 0x14 }
+  - { offset: 0x283F, size: 0x8, addend: 0x0, symName: __ZL21IAPGuardProductPricesv.cold.1, symObjAddr: 0x21C4, symBinAddr: 0x8680, symSize: 0x14 }
+  - { offset: 0x285A, size: 0x8, addend: 0x0, symName: __ZL21IAPGuardProductPricesv.cold.1, symObjAddr: 0x21C4, symBinAddr: 0x8680, symSize: 0x14 }
+  - { offset: 0x286B, size: 0x8, addend: 0x0, symName: __ZL15_logosLocalInitv, symObjAddr: 0x498, symBinAddr: 0x4498, symSize: 0x188 }
+  - { offset: 0x2965, size: 0x8, addend: 0x0, symName: '__ZL47_logos_method$_ungrouped$SKRequest$setDelegate$P9SKRequestP13objc_selectorP11objc_object', symObjAddr: 0x620, symBinAddr: 0x4620, symSize: 0x1A0 }
+  - { offset: 0x29CF, size: 0x8, addend: 0x0, symName: '__ZL47_logos_method$_ungrouped$SKRequest$setDelegate$P9SKRequestP13objc_selectorP11objc_object', symObjAddr: 0x620, symBinAddr: 0x4620, symSize: 0x1A0 }
+  - { offset: 0x2B02, size: 0x8, addend: 0x0, symName: '__ZL43_logos_method$_ungrouped$SKRequest$delegateP9SKRequestP13objc_selector', symObjAddr: 0x7C0, symBinAddr: 0x47C0, symSize: 0xA0 }
+  - { offset: 0x2B6B, size: 0x8, addend: 0x0, symName: '__ZL52_logos_method$_ungrouped$SKProductsResponse$productsP18SKProductsResponseP13objc_selector', symObjAddr: 0x860, symBinAddr: 0x4860, symSize: 0x60 }
+  - { offset: 0x2C04, size: 0x8, addend: 0x0, symName: '__ZL63_logos_method$_ungrouped$SKPaymentQueue$addTransactionObserver$P14SKPaymentQueueP13objc_selectorP11objc_object', symObjAddr: 0x8C0, symBinAddr: 0x48C0, symSize: 0xD8 }
+  - { offset: 0x2CB4, size: 0x8, addend: 0x0, symName: '__ZL66_logos_method$_ungrouped$SKPaymentQueue$removeTransactionObserver$P14SKPaymentQueueP13objc_selectorP11objc_object', symObjAddr: 0x998, symBinAddr: 0x4998, symSize: 0xD8 }
+  - { offset: 0x2DA1, size: 0x8, addend: 0x0, symName: '__ZL52_logos_method$_ungrouped$SKPaymentQueue$transactionsP14SKPaymentQueueP13objc_selector', symObjAddr: 0xA70, symBinAddr: 0x4A70, symSize: 0x250 }
+  - { offset: 0x3005, size: 0x8, addend: 0x0, symName: '__ZL51_logos_method$_ungrouped$SKPaymentQueue$addPayment$P14SKPaymentQueueP13objc_selectorP9SKPayment', symObjAddr: 0xCC0, symBinAddr: 0x4CC0, symSize: 0x658 }
+  - { offset: 0x322A, size: 0x8, addend: 0x0, symName: __ZL21IAPGuardTrimmedStringP8NSString, symObjAddr: 0x1754, symBinAddr: 0x5754, symSize: 0xFC }
+  - { offset: 0x32D2, size: 0x8, addend: 0x0, symName: '__ZL58_logos_method$_ungrouped$SKPaymentQueue$finishTransaction$P14SKPaymentQueueP13objc_selectorP20SKPaymentTransaction', symObjAddr: 0x1318, symBinAddr: 0x5318, symSize: 0x14C }
+  - { offset: 0x33C9, size: 0x8, addend: 0x0, symName: ____ZL17IAPGuardObserversv_block_invoke, symObjAddr: 0x1850, symBinAddr: 0x5850, symSize: 0x48 }
+  - { offset: 0x33EE, size: 0x8, addend: 0x0, symName: ____ZL30IAPGuardDeniedTransactionArrayv_block_invoke, symObjAddr: 0x1898, symBinAddr: 0x5898, symSize: 0x48 }
+  - { offset: 0x3413, size: 0x8, addend: 0x0, symName: ____ZL21IAPGuardProductPricesv_block_invoke, symObjAddr: 0x18E0, symBinAddr: 0x58E0, symSize: 0x48 }
+  - { offset: 0x3438, size: 0x8, addend: 0x0, symName: ____ZL27IAPGuardNotifyFailedPaymentP14SKPaymentQueueP25IAPGuardFailedTransaction_block_invoke, symObjAddr: 0x1928, symBinAddr: 0x5928, symSize: 0x15C }
+  - { offset: 0x34A1, size: 0x8, addend: 0x0, symName: ___copy_helper_block_ea8_32s40s48s, symObjAddr: 0x1A84, symBinAddr: 0x5A84, symSize: 0x44 }
+  - { offset: 0x34C7, size: 0x8, addend: 0x0, symName: ___destroy_helper_block_ea8_32s40s48s, symObjAddr: 0x1AC8, symBinAddr: 0x5AC8, symSize: 0x44 }
+  - { offset: 0x3BF1, size: 0x8, addend: 0x0, symName: ____ZL26IAPGuardPresentDeniedAlertP8NSStringS0_S0__block_invoke, symObjAddr: 0x1B0C, symBinAddr: 0x5B0C, symSize: 0x490 }
+  - { offset: 0x3CAF, size: 0x8, addend: 0x0, symName: __ZL29IAPGuardTopViewControllerFromP16UIViewController, symObjAddr: 0x2034, symBinAddr: 0x6034, symSize: 0x158 }
+  - { offset: 0x3D1C, size: 0x8, addend: 0x0, symName: ___copy_helper_block_ea8_32s40s48s56s, symObjAddr: 0x1F9C, symBinAddr: 0x5F9C, symSize: 0x4C }
+  - { offset: 0x3D42, size: 0x8, addend: 0x0, symName: ___destroy_helper_block_ea8_32s40s48s56s, symObjAddr: 0x1FE8, symBinAddr: 0x5FE8, symSize: 0x4C }
+  - { offset: 0x40E1, size: 0x8, addend: 0x0, symName: '+[IAPGuardConfig sharedConfig]', symObjAddr: 0x0, symBinAddr: 0x618C, symSize: 0x44 }
+  - { offset: 0x4129, size: 0x8, addend: 0x0, symName: '+[IAPGuardConfig sharedConfig]', symObjAddr: 0x0, symBinAddr: 0x618C, symSize: 0x44 }
+  - { offset: 0x4152, size: 0x8, addend: 0x0, symName: '__ZZ30+[IAPGuardConfig sharedConfig]E6config', symObjAddr: 0x7BF0, symBinAddr: 0x10DC0, symSize: 0x0 }
+  - { offset: 0x4167, size: 0x8, addend: 0x0, symName: '__ZZ30+[IAPGuardConfig sharedConfig]E9onceToken', symObjAddr: 0x7BF8, symBinAddr: 0x10DC8, symSize: 0x0 }
+  - { offset: 0x42DD, size: 0x8, addend: 0x0, symName: '+[IAPGuardConfig sharedConfig].cold.1', symObjAddr: 0x1B14, symBinAddr: 0x8694, symSize: 0x14 }
+  - { offset: 0x42F8, size: 0x8, addend: 0x0, symName: '+[IAPGuardConfig sharedConfig].cold.1', symObjAddr: 0x1B14, symBinAddr: 0x8694, symSize: 0x14 }
+  - { offset: 0x4309, size: 0x8, addend: 0x0, symName: '___30+[IAPGuardConfig sharedConfig]_block_invoke', symObjAddr: 0x44, symBinAddr: 0x61D0, symSize: 0x54 }
+  - { offset: 0x432E, size: 0x8, addend: 0x0, symName: '-[IAPGuardConfig init]', symObjAddr: 0x98, symBinAddr: 0x6224, symSize: 0xD0 }
+  - { offset: 0x4362, size: 0x8, addend: 0x0, symName: '-[IAPGuardConfig reloadIfNeeded]', symObjAddr: 0x168, symBinAddr: 0x62F4, symSize: 0x154 }
+  - { offset: 0x43C5, size: 0x8, addend: 0x0, symName: '-[IAPGuardConfig isPriceAllowed:]', symObjAddr: 0x2BC, symBinAddr: 0x6448, symSize: 0xA4 }
+  - { offset: 0x4408, size: 0x8, addend: 0x0, symName: '-[IAPGuardConfig consumeAllowanceForPrice:remainingQuotaAfterConsume:usedQuota:]', symObjAddr: 0x360, symBinAddr: 0x64EC, symSize: 0x2C0 }
+  - { offset: 0x44AB, size: 0x8, addend: 0x0, symName: '-[IAPGuardConfig allowedPricesSnapshot]', symObjAddr: 0x620, symBinAddr: 0x67AC, symSize: 0x120 }
+  - { offset: 0x44DF, size: 0x8, addend: 0x0, symName: '-[IAPGuardConfig allowedPricesDisplayString]', symObjAddr: 0x740, symBinAddr: 0x68CC, symSize: 0x3D0 }
+  - { offset: 0x4561, size: 0x8, addend: 0x0, symName: '-[IAPGuardConfig remainingQuotaForPrice:]', symObjAddr: 0xB10, symBinAddr: 0x6C9C, symSize: 0x170 }
+  - { offset: 0x45DD, size: 0x8, addend: 0x0, symName: '-[IAPGuardConfig remainingQuotaDisplayStringForPrice:]', symObjAddr: 0xC80, symBinAddr: 0x6E0C, symSize: 0xB0 }
+  - { offset: 0x462F, size: 0x8, addend: 0x0, symName: '-[IAPGuardConfig resolveConfigPath]', symObjAddr: 0xD30, symBinAddr: 0x6EBC, symSize: 0xA4 }
+  - { offset: 0x4690, size: 0x8, addend: 0x0, symName: '-[IAPGuardConfig currentConfigModificationDate]', symObjAddr: 0xDD4, symBinAddr: 0x6F60, symSize: 0x140 }
+  - { offset: 0x46F1, size: 0x8, addend: 0x0, symName: '-[IAPGuardConfig reloadWithModificationDate:]', symObjAddr: 0xF14, symBinAddr: 0x70A0, symSize: 0x554 }
+  - { offset: 0x4811, size: 0x8, addend: 0x0, symName: '___45-[IAPGuardConfig reloadWithModificationDate:]_block_invoke', symObjAddr: 0x1468, symBinAddr: 0x75F4, symSize: 0x14C }
+  - { offset: 0x48A8, size: 0x8, addend: 0x0, symName: ___copy_helper_block_ea8_32s40s, symObjAddr: 0x15B4, symBinAddr: 0x7740, symSize: 0x3C }
+  - { offset: 0x48CE, size: 0x8, addend: 0x0, symName: ___destroy_helper_block_ea8_32s40s, symObjAddr: 0x15F0, symBinAddr: 0x777C, symSize: 0x3C }
+  - { offset: 0x48EB, size: 0x8, addend: 0x0, symName: '-[IAPGuardConfig isPriceAllowedLocked:]', symObjAddr: 0x162C, symBinAddr: 0x77B8, symSize: 0x150 }
+  - { offset: 0x493D, size: 0x8, addend: 0x0, symName: '-[IAPGuardConfig writeAllowedPriceQuotasLocked:]', symObjAddr: 0x177C, symBinAddr: 0x7908, symSize: 0x1F0 }
+  - { offset: 0x499E, size: 0x8, addend: 0x0, symName: '+[IAPGuardConfig normalizedPriceString:]', symObjAddr: 0x196C, symBinAddr: 0x7AF8, symSize: 0xD0 }
+  - { offset: 0x49DF, size: 0x8, addend: 0x0, symName: '-[IAPGuardConfig lastModificationDate]', symObjAddr: 0x1A3C, symBinAddr: 0x7BC8, symSize: 0x8 }
+  - { offset: 0x4A13, size: 0x8, addend: 0x0, symName: '-[IAPGuardConfig setLastModificationDate:]', symObjAddr: 0x1A44, symBinAddr: 0x7BD0, symSize: 0xC }
+  - { offset: 0x4A50, size: 0x8, addend: 0x0, symName: '-[IAPGuardConfig allowedPrices]', symObjAddr: 0x1A50, symBinAddr: 0x7BDC, symSize: 0x8 }
+  - { offset: 0x4A84, size: 0x8, addend: 0x0, symName: '-[IAPGuardConfig setAllowedPrices:]', symObjAddr: 0x1A58, symBinAddr: 0x7BE4, symSize: 0xC }
+  - { offset: 0x4AC1, size: 0x8, addend: 0x0, symName: '-[IAPGuardConfig allowedPriceQuotas]', symObjAddr: 0x1A64, symBinAddr: 0x7BF0, symSize: 0x8 }
+  - { offset: 0x4AF5, size: 0x8, addend: 0x0, symName: '-[IAPGuardConfig setAllowedPriceQuotas:]', symObjAddr: 0x1A6C, symBinAddr: 0x7BF8, symSize: 0xC }
+  - { offset: 0x4B32, size: 0x8, addend: 0x0, symName: '-[IAPGuardConfig hasAllowedPriceQuotas]', symObjAddr: 0x1A78, symBinAddr: 0x7C04, symSize: 0x8 }
+  - { offset: 0x4B66, size: 0x8, addend: 0x0, symName: '-[IAPGuardConfig setHasAllowedPriceQuotas:]', symObjAddr: 0x1A80, symBinAddr: 0x7C0C, symSize: 0x8 }
+  - { offset: 0x4B9D, size: 0x8, addend: 0x0, symName: '-[IAPGuardConfig resolvedConfigPath]', symObjAddr: 0x1A88, symBinAddr: 0x7C14, symSize: 0x8 }
+  - { offset: 0x4BD1, size: 0x8, addend: 0x0, symName: '-[IAPGuardConfig setResolvedConfigPath:]', symObjAddr: 0x1A90, symBinAddr: 0x7C1C, symSize: 0x8 }
+  - { offset: 0x4C0C, size: 0x8, addend: 0x0, symName: '-[IAPGuardConfig isEnabled]', symObjAddr: 0x1A98, symBinAddr: 0x7C24, symSize: 0x8 }
+  - { offset: 0x4C40, size: 0x8, addend: 0x0, symName: '-[IAPGuardConfig setEnabled:]', symObjAddr: 0x1AA0, symBinAddr: 0x7C2C, symSize: 0x8 }
+  - { offset: 0x4C77, size: 0x8, addend: 0x0, symName: '-[IAPGuardConfig hasLoaded]', symObjAddr: 0x1AA8, symBinAddr: 0x7C34, symSize: 0x8 }
+  - { offset: 0x4CAB, size: 0x8, addend: 0x0, symName: '-[IAPGuardConfig setHasLoaded:]', symObjAddr: 0x1AB0, symBinAddr: 0x7C3C, symSize: 0x8 }
+  - { offset: 0x4CE2, size: 0x8, addend: 0x0, symName: '-[IAPGuardConfig .cxx_destruct]', symObjAddr: 0x1AB8, symBinAddr: 0x7C44, symSize: 0x5C }
+  - { offset: 0x4EA0, size: 0x8, addend: 0x0, symName: '-[IAPGuardFailedTransaction initWithPayment:]', symObjAddr: 0x0, symBinAddr: 0x7CA0, symSize: 0x240 }
+  - { offset: 0x5171, size: 0x8, addend: 0x0, symName: '-[IAPGuardFailedTransaction initWithPayment:]', symObjAddr: 0x0, symBinAddr: 0x7CA0, symSize: 0x240 }
+  - { offset: 0x51B4, size: 0x8, addend: 0x0, symName: '-[IAPGuardFailedTransaction payment]', symObjAddr: 0x240, symBinAddr: 0x7EE0, symSize: 0x10 }
+  - { offset: 0x51E8, size: 0x8, addend: 0x0, symName: '-[IAPGuardFailedTransaction error]', symObjAddr: 0x250, symBinAddr: 0x7EF0, symSize: 0x10 }
+  - { offset: 0x521C, size: 0x8, addend: 0x0, symName: '-[IAPGuardFailedTransaction transactionState]', symObjAddr: 0x260, symBinAddr: 0x7F00, symSize: 0x8 }
+  - { offset: 0x524C, size: 0x8, addend: 0x0, symName: '-[IAPGuardFailedTransaction transactionIdentifier]', symObjAddr: 0x268, symBinAddr: 0x7F08, symSize: 0x10 }
+  - { offset: 0x5280, size: 0x8, addend: 0x0, symName: '-[IAPGuardFailedTransaction transactionDate]', symObjAddr: 0x278, symBinAddr: 0x7F18, symSize: 0x10 }
+  - { offset: 0x52B4, size: 0x8, addend: 0x0, symName: '-[IAPGuardFailedTransaction originalTransaction]', symObjAddr: 0x288, symBinAddr: 0x7F28, symSize: 0x8 }
+  - { offset: 0x52E4, size: 0x8, addend: 0x0, symName: '-[IAPGuardFailedTransaction transactionReceipt]', symObjAddr: 0x290, symBinAddr: 0x7F30, symSize: 0xC }
+  - { offset: 0x5314, size: 0x8, addend: 0x0, symName: '-[IAPGuardFailedTransaction downloads]', symObjAddr: 0x29C, symBinAddr: 0x7F3C, symSize: 0x10 }
+  - { offset: 0x5344, size: 0x8, addend: 0x0, symName: '-[IAPGuardFailedTransaction description]', symObjAddr: 0x2AC, symBinAddr: 0x7F4C, symSize: 0xF8 }
+  - { offset: 0x5378, size: 0x8, addend: 0x0, symName: '-[IAPGuardFailedTransaction .cxx_destruct]', symObjAddr: 0x3A4, symBinAddr: 0x8044, symSize: 0x7C }
+...
