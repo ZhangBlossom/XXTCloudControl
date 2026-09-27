@@ -800,6 +800,9 @@ func forwardDeviceMessageToControllers(conn *SafeConn, data Message) error {
 
 // handleMessage processes incoming WebSocket messages
 func handleMessage(conn *SafeConn, data Message) error {
+	if deliverOrderReply(conn, data) {
+		return nil
+	}
 	switch data.Type {
 	case "control/devices":
 		if !isDataValid(data) {

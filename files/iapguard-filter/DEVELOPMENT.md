@@ -1,11 +1,27 @@
 # IAPGuard Development Notes
 
+## Honor / mr cancellation compatibility
+
+The tested `mr.dylib` registers only its `InsideAppStore` observer with StoreKit.
+Its failed-transaction branch finishes the transaction without notifying the game's
+original observer. For Honor of Kings only, and only when that class comes from
+`mr.dylib`, IAPGuard preserves the original handler and relays genuine StoreKit
+user-cancellation events to the captured game observers on the main queue.
+The relay excludes its source and deduplicates each transaction. Success, restored
+transactions and other failures are not relayed. Quotas are never refunded.
+Repeated finishing of relayed cancellations or locally denied transactions does
+not send the same transaction to StoreKit twice.
+
+Run `python3 tests/test_cancellation_relay_native.py` for the isolated native
+regression test. Real-device coexistence must still be checked after plugin or
+game updates; this is a compatibility path for the tested game and plugin.
+
 ## Runtime model
 
 IAPGuard has two runtime inputs:
 
 1. StoreKit 1 product metadata returned by the target app's normal `SKProductsRequest` flow.
-2. A single global runtime plist that lists the currently allowed prices.
+2. An app-container runtime plist that lists the currently allowed prices.
 
 The tweak does not need pre-collected product IDs. Every injected app process keeps its own in-memory product price map:
 
@@ -13,21 +29,19 @@ The tweak does not need pre-collected product IDs. Every injected app process ke
 productIdentifier -> product.price.stringValue
 ```
 
-Purchase decisions use that runtime price map plus the global `allowedPriceQuotas` plist. Legacy `allowedPrices` remains supported when no quota dictionary exists.
+Purchase decisions use that runtime price map plus the app-container `allowedPriceQuotas` plist. Legacy `allowedPrices` remains supported when no quota dictionary exists.
 
 ## Runtime plist
 
-Logical path:
+Runtime config path relative to `NSHomeDirectory()` (the game data container):
 
 ```text
-/var/mobile/Library/Preferences/com.iapguard.runtime.plist
+Library/Preferences/com.iapguard.runtime.plist
 ```
 
-roothide path resolution is handled in code with `jbroot()`. On device the resolved path looks like:
+The plugin reads and atomically updates this file inside its own app container. The controller must resolve the game’s current data container (for example, XXTouch `app.data_path(bundle_id)`) and write the same file before launching the game. Do not apply `jbroot()` to this path.
 
-```text
-/var/containers/Bundle/Application/.jbroot-XXXX/var/mobile/Library/Preferences/com.iapguard.runtime.plist
-```
+Migration: the old `.jbroot-*/var/mobile/Library/Preferences` policy is no longer read. Stop the game, change the device profile’s `policy_path` to the game-container path, and write a fresh order policy. Container UUIDs may change after reinstall. The `.deb` intentionally contains no runtime policy; keep the repository plist as a sample only.
 
 Format:
 
@@ -35,10 +49,11 @@ Format:
 <dict>
   <key>enabled</key>
   <true/>
-  <key>allowedPrices</key>
-  <array>
-    <string>0.99</string>
-  </array>
+  <key>allowedPriceQuotas</key>
+  <dict>
+    <key>0.99</key>
+    <integer>5</integer>
+  </dict>
 </dict>
 ```
 
@@ -48,6 +63,7 @@ Rules:
 - `enabled=true` with `allowedPriceQuotas`: allow only prices whose remaining count is greater than `0`, then decrement and write back.
 - `enabled=true` without `allowedPriceQuotas`: fall back to legacy `allowedPrices`.
 - Missing plist, empty quota map, unknown product price, non-matching price, or quota `0`: deny.
+- A quota decrement is allowed only after an atomic write and matching readback. Write failure denies the purchase and clears in-memory quotas. Cancellation does not refund a consumed attempt.
 - The config loader checks the plist modification time before purchase decisions and reloads when changed.
 
 ## Load order
@@ -88,20 +104,22 @@ The original `addPayment:` is not called for denied purchases.
 From the repository root:
 
 ```sh
-cd /Users/qzytwway/Documents/game_top_up/plugin/iapguard-filter
+cd files/iapguard-filter
 make clean package FINALPACKAGE=1
 ```
+
+For a diagnostic package add `IAPGUARD_DIAGNOSTICS=1`; release builds omit the boundary logs. The diagnostic filter used for Honor of Kings contains only `com.levelinfinite.sgameGlobal`. These tests do not establish that StoreKit callbacks or another injected plugin behave correctly on a real phone.
 
 The generated roothide deb is written to:
 
 ```text
-/Users/qzytwway/Documents/game_top_up/plugin/iapguard-filter/packages/
+files/iapguard-filter/packages/
 ```
 
 Find the latest package:
 
 ```sh
-ls -t /Users/qzytwway/Documents/game_top_up/plugin/iapguard-filter/packages/*iphoneos-arm64e.deb | head -1
+ls -t files/iapguard-filter/packages/*iphoneos-arm64e.deb | head -1
 ```
 
 ## Verification commands
@@ -109,18 +127,18 @@ ls -t /Users/qzytwway/Documents/game_top_up/plugin/iapguard-filter/packages/*iph
 From the repository root:
 
 ```sh
-./iapguard-filter/tests/test_config.sh
-./iapguard-filter/tests/test_roothide_sources.sh
-./iapguard-filter/tests/test_manager_sources.sh
-./iapguard-filter/tests/test_alert_sources.sh
-./iapguard-filter/tests/test_dynamic_prices_sources.sh
-plutil -lint iapguard-filter/zzzIAPGuard.plist iapguard-filter/com.iapguard.runtime.plist iapguard-filter/layout/var/mobile/Library/Preferences/com.iapguard.runtime.plist
+sh files/iapguard-filter/tests/test_config.sh
+sh files/iapguard-filter/tests/test_roothide_sources.sh
+sh files/iapguard-filter/tests/test_manager_sources.sh
+sh files/iapguard-filter/tests/test_alert_sources.sh
+sh files/iapguard-filter/tests/test_dynamic_prices_sources.sh
+plutil -lint files/iapguard-filter/zzzIAPGuard.plist files/iapguard-filter/com.iapguard.runtime.plist
 ```
 
 After packaging:
 
 ```sh
-DEB=$(ls -t iapguard-filter/packages/*iphoneos-arm64e.deb | head -1)
-./iapguard-filter/tests/test_roothide_package.sh "$DEB"
-dpkg-deb -f "$DEB" Package Version Architecture
+DEB=$(ls -t files/iapguard-filter/packages/*iphoneos-arm64e.deb | head -1)
+sh files/iapguard-filter/tests/test_roothide_package.sh "$DEB"
+python3 files/iapguard-filter/tests/test_config_native.py
 ```

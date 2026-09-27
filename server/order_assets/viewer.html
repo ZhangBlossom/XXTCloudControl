@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>订单远程手机</title>
+<style>
+:root{color-scheme:light dark}body{font:16px system-ui;margin:1rem;text-align:center}video{max-width:100%;max-height:75vh;touch-action:none;object-fit:contain}button,input{font:inherit;padding:.6rem;margin:.25rem}#status{min-height:2rem}#controls{display:flex;justify-content:center;flex-wrap:wrap}button:disabled{opacity:.5}
+</style>
+<h1>订单远程手机</h1><p id="status" role="status">正在核对会话</p>
+<video id="screen" autoplay playsinline muted aria-label="远程手机画面"></video>
+<div id="controls"><button id="finish" disabled>结束使用</button></div>
+<p>会话最多 6 分钟。请在游戏内输入账号信息，不要将凭据发给客服。</p>
+<script>
+'use strict';
+const args=new URLSearchParams(location.hash.slice(1)), order=args.get('order'), token=args.get('token');
+history.replaceState(null,'',location.pathname);
+const status=document.getElementById('status'), video=document.getElementById('screen'), finish=document.getElementById('finish');
+let peer,channel,ended=false,polling=false,expires=0,remaining=0,pointer=null;
+async function api(suffix,data){
+ const response=await fetch('/order-viewer/v1/'+encodeURIComponent(order)+suffix,{method:data===undefined?'GET':'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:data===undefined?undefined:JSON.stringify(data),cache:'no-store'});
+ if(!response.ok){const e=new Error(response.status===401?'会话已结束或入口已失效':'连接失败，请回订单页重试');e.status=response.status;throw e;}
+ return response.status===202||response.status===204?{}:response.json();
+}
+function closeLocal(message,reason){
+ if(!ended&&reason&&order&&token&&(!expires||Date.now()<expires)){
+  // Best effort only: a fully offline browser cannot deliver an error report.
+  // The server independently records missing status heartbeats.
+  api('/failure',{reason}).catch(()=>{});
+ }
+ ended=true;polling=false;peer?.close();video.srcObject=null;finish.disabled=true;status.textContent=message;
+}
+function signal(action,data={}){return api('/signal/'+action,data);}
+async function poll(){
+ while(polling&&!ended){
+  try {const messages=await signal('poll');for(const m of (Array.isArray(messages)?messages:[])){
+   if(m.type==='ice'||m.type==='candidate'){const candidate=m.candidate;if(candidate)await peer.addIceCandidate(typeof candidate==='string'?{candidate,sdpMid:m.sdpMid,sdpMLineIndex:m.sdpMLineIndex}:candidate);}
+   if(['closed','disconnected','disconnect','kicked'].includes(m.type)){const e=new Error('远程连接已结束');e.reason='remote_disconnected';throw e;}
+  }await new Promise(resolve=>setTimeout(resolve,100));}catch(e){closeLocal(e.message,e.status===401?undefined:(e.reason||'signal_failed'));return;}
+ }
+}
+async function connectPhone(){
+
+ try{
+  const offer=await signal('start');if(offer.type!=='offer'||!offer.sdp)throw new Error('手机未返回有效画面连接');
+  peer=new RTCPeerConnection({iceServers:offer.iceServers||[]});
+  peer.ontrack=e=>{video.srcObject=e.streams[0]||new MediaStream([e.track]);};
+  peer.ondatachannel=e=>{channel=e.channel;};
+  peer.onicecandidate=e=>{if(e.candidate)signal('ice',e.candidate.toJSON()).catch(e=>closeLocal(e.message,e.status===401?undefined:'signal_failed'));};
+  peer.onconnectionstatechange=()=>{if(!ended&&['failed','closed'].includes(peer.connectionState))closeLocal('远程连接已中断，请回订单页重新获取入口','connection_failed');};
+  await peer.setRemoteDescription({type:'offer',sdp:offer.sdp});
+  const answer=await peer.createAnswer();await peer.setLocalDescription(answer);await signal('answer',{sdp:answer.sdp});
+  polling=true;poll();
+ }catch(e){closeLocal(e.message,e.status===401?undefined:'signal_failed');}
+};
+function touch(e,action){
+ if(ended||!channel||channel.readyState!=='open'||!video.videoWidth)return;
+ const box=video.getBoundingClientRect();const scale=Math.min(box.width/video.videoWidth,box.height/video.videoHeight);
+ const w=video.videoWidth*scale,h=video.videoHeight*scale,left=box.left+(box.width-w)/2,top=box.top+(box.height-h)/2;
+ const x=Math.max(0,Math.min(1,(e.clientX-left)/w)),y=Math.max(0,Math.min(1,(e.clientY-top)/h));
+ channel.send(JSON.stringify({type:'touch',action,x,y,fingerId:28}));
+}
+video.onpointerdown=e=>{if(pointer!==null)return;pointer=e.pointerId;video.setPointerCapture(pointer);touch(e,'down');};
+video.onpointermove=e=>{if(e.pointerId===pointer)touch(e,'move');};
+video.onpointerup=video.onpointercancel=e=>{if(e.pointerId===pointer){touch(e,'up');pointer=null;}};
+finish.onclick=async()=>{if(!confirm('结束后将断开手机，确定结束吗？'))return;try{await api('/release',{});closeLocal('使用已结束，手机正在回收');}catch(e){closeLocal(e.message);}};
+async function refresh(){if(ended)return;try{const s=await api('/status');expires=Date.parse(s.expires_at);remaining=s.remaining;if(!expires||Date.now()>=expires){closeLocal('使用时间已到');return;}status.textContent='剩余 '+Math.max(0,Math.ceil((expires-Date.now())/1000))+' 秒 · 可购买 '+remaining+' 次';}catch(e){closeLocal(e.message,e.status===401?undefined:'signal_failed');}}
+if(!order||!token)closeLocal('请从订单页获取有效的手机入口');else{refresh().then(()=>{if(!ended){finish.disabled=false;connectPhone();}});setInterval(refresh,2000);}
+window.addEventListener('pagehide',()=>{ended=true;polling=false;peer?.close();});
+window.addEventListener('offline',()=>closeLocal('网络已断开，请回订单页重试','browser_offline'));
+</script></html>

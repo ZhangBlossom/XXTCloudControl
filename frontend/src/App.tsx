@@ -1,4 +1,5 @@
-import { Component, createSignal, onCleanup, createMemo, createEffect } from 'solid-js';
+import OrderSessionsPanel from './components/OrderSessionsPanel';
+import { Component, createSignal, onCleanup, createMemo, createEffect, Show } from 'solid-js';
 import { Portal } from 'solid-js/web';
 import { useToast } from './components/ToastContext';
 import { WebSocketService, Device } from './services/WebSocketService';
@@ -109,6 +110,7 @@ const App: Component = () => {
   
   // Group management state
   const groupStore = createGroupStore();
+  const [showOrders, setShowOrders] = createSignal(false);
   const [showNewGroupModal, setShowNewGroupModal] = createSignal(false);
   const [showAddToGroupModal, setShowAddToGroupModal] = createSignal(false);
 
@@ -1355,6 +1357,7 @@ const App: Component = () => {
               )}
             </div>
             <div class={styles.headerRight}>
+              <button class={styles.orderToggle} aria-pressed={showOrders()} onClick={() => setShowOrders(!showOrders())}>{showOrders() ? '返回设备' : '订单会话'}</button>
               <div class={styles.serverInfo}>
                 <span class={styles.serverIp}>{serverHost()}</span>
               </div>
@@ -1370,6 +1373,8 @@ const App: Component = () => {
             </div>
           </header>
           <main class={`${styles.appMain} ${isMobileMenuOpen() ? styles.sidebarOpen : ''}`}>
+            <Show when={showOrders()}><OrderSessionsPanel /></Show>
+            <Show when={!showOrders()}>
             <DeviceList 
               devices={filteredDevices()}
               onDeviceSelect={handleDeviceSelect}
@@ -1400,6 +1405,7 @@ const App: Component = () => {
                 />
               }
             />
+            </Show>
           </main>
         </div>
       )}

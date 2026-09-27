@@ -4,9 +4,8 @@ set -eu
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 PROJECT_DIR=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
 CONFIG="$PROJECT_DIR/com.iapguard.runtime.plist"
-LAYOUT_CONFIG="$PROJECT_DIR/layout/var/mobile/Library/Preferences/com.iapguard.runtime.plist"
 
-for file in "$CONFIG" "$LAYOUT_CONFIG"; do
+for file in "$CONFIG"; do
   [ -f "$file" ] || {
     echo "missing runtime config: $file" >&2
     exit 1
@@ -37,4 +36,4 @@ for file in "$CONFIG" "$LAYOUT_CONFIG"; do
   fi
 done
 
-echo "runtime price quota config test passed"
+echo "sample price quota config test passed (not an installed policy)"

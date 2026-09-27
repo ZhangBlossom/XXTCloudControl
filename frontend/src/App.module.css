@@ -345,3 +345,8 @@
     grid-template-columns: 1fr;
   }
 }
+
+.orderToggle { border: 1px solid var(--border); background: var(--panel-2); color: var(--text); border-radius: 8px; min-height: 40px; padding: 6px 10px; white-space: nowrap; cursor: pointer; transition: transform .15s ease; }
+.orderToggle:active { transform: scale(.98); }
+.orderToggle:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .orderToggle { transition: none; } }

@@ -8,8 +8,11 @@ include $(THEOS)/makefiles/common.mk
 
 TWEAK_NAME = zzzIAPGuard
 
-zzzIAPGuard_FILES = src/Tweak.xm src/IAPGuardConfig.mm src/IAPGuardFailedTransaction.mm
+zzzIAPGuard_FILES = src/Tweak.xm src/IAPGuardConfig.mm src/IAPGuardFailedTransaction.mm src/IAPGuardCancellationRelay.mm
 zzzIAPGuard_CFLAGS = -fobjc-arc
+ifeq ($(IAPGUARD_DIAGNOSTICS),1)
+zzzIAPGuard_CFLAGS += -DIAPGUARD_DIAGNOSTICS=1
+endif
 zzzIAPGuard_FRAMEWORKS = Foundation StoreKit UIKit
 zzzIAPGuard_LIBRARIES = roothide
 

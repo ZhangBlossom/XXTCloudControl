@@ -5,6 +5,37 @@
 #import <objc/runtime.h>
 #import "IAPGuardConfig.h"
 #import "IAPGuardFailedTransaction.h"
+#import "IAPGuardDiagnostics.h"
+#import "IAPGuardCancellationRelay.h"
+static BOOL IAPGuardMRCompatibility = NO;
+static char kIAPGuardCancellationFinished;
+#if IAPGUARD_DIAGNOSTICS
+#import <substrate.h>
+
+static void IAPGuardTraceObserver(id observer) {
+    Class cls = [observer class];
+    SEL selector = @selector(paymentQueue:updatedTransactions:);
+    if (!cls || ![observer respondsToSelector:selector]) return;
+    static NSMutableSet *hooked;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{ hooked = [NSMutableSet set]; });
+    @synchronized (hooked) {
+        NSString *name = NSStringFromClass(cls);
+        if ([hooked containsObject:name]) return;
+        [hooked addObject:name];
+        __block IMP original = NULL;
+        IMP replacement = imp_implementationWithBlock(^(id target, SKPaymentQueue *queue, NSArray *transactions) {
+            for (SKPaymentTransaction *transaction in transactions) {
+                IAPGuardTrace(@"observer_enter class=%@ state=%ld error_code=%ld", name,
+                              (long)transaction.transactionState, (long)transaction.error.code);
+            }
+            ((void (*)(id, SEL, SKPaymentQueue *, NSArray *))original)(target, selector, queue, transactions);
+            IAPGuardTrace(@"observer_return class=%@", name);
+        });
+        MSHookMessageEx(cls, selector, replacement, &original);
+    }
+}
+#endif
 
 // Per-process StoreKit price cache. Each target app records its own product IDs at runtime.
 static NSMutableDictionary<NSString *, NSString *> *IAPGuardProductPrices(void) {
@@ -317,10 +348,12 @@ static void IAPGuardPresentDeniedAlert(NSString *productIdentifier, NSString *pr
     dispatch_async(dispatch_get_main_queue(), ^{
         UIViewController *topViewController = IAPGuardCurrentTopViewController();
         if (!topViewController) {
+            IAPGuardTrace(@"alert_skipped=no_controller");
             return;
         }
 
         if ([topViewController isKindOfClass:[UIAlertController class]]) {
+            IAPGuardTrace(@"alert_skipped=existing_alert");
             return;
         }
 
@@ -330,12 +363,16 @@ static void IAPGuardPresentDeniedAlert(NSString *productIdentifier, NSString *pr
                                                                 preferredStyle:UIAlertControllerStyleAlert];
         UIAlertAction *ok = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil];
         [alert addAction:ok];
-        [topViewController presentViewController:alert animated:YES completion:nil];
+        IAPGuardTrace(@"alert_present_requested");
+        [topViewController presentViewController:alert animated:YES completion:^{
+            IAPGuardTrace(@"alert_present_completed");
+        }];
     });
 }
 
 static void IAPGuardNotifyFailedPayment(SKPaymentQueue *queue, IAPGuardFailedTransaction *failedTransaction) {
     NSArray *observers = IAPGuardObserverSnapshot();
+    IAPGuardTrace(@"denied_callback_scheduled observers=%lu", (unsigned long)observers.count);
     if (observers.count == 0) {
         return;
     }
@@ -350,9 +387,12 @@ static void IAPGuardNotifyFailedPayment(SKPaymentQueue *queue, IAPGuardFailedTra
             }
 
             @try {
+                IAPGuardTrace(@"denied_callback_enter observer=%@", NSStringFromClass([observer class]));
                 void (*sendCallback)(id, SEL, SKPaymentQueue *, NSArray *) = (void (*)(id, SEL, SKPaymentQueue *, NSArray *))objc_msgSend;
                 sendCallback(observer, callback, queue, updatedTransactions);
+                IAPGuardTrace(@"denied_callback_return");
             } @catch (NSException *exception) {
+                IAPGuardTrace(@"denied_callback_exception name=%@", exception.name);
             }
         }
     });
@@ -394,6 +434,9 @@ static void IAPGuardNotifyFailedPayment(SKPaymentQueue *queue, IAPGuardFailedTra
 %hook SKPaymentQueue
 
 - (void)addTransactionObserver:(id)observer {
+#if IAPGUARD_DIAGNOSTICS
+    IAPGuardTraceObserver(observer);
+#endif
     IAPGuardAddObserver(observer);
     %orig(observer);
 }
@@ -410,6 +453,7 @@ static void IAPGuardNotifyFailedPayment(SKPaymentQueue *queue, IAPGuardFailedTra
 }
 
 - (void)addPayment:(SKPayment *)payment {
+    IAPGuardTrace(@"addPayment_enter main_thread=%d", [NSThread isMainThread]);
     // Gate purchase attempts by the recorded StoreKit price and the runtime allowedPrices plist.
     NSString *productIdentifier = nil;
     @try {
@@ -421,12 +465,17 @@ static void IAPGuardNotifyFailedPayment(SKPaymentQueue *queue, IAPGuardFailedTra
     [config reloadIfNeeded];
 
     NSString *priceString = IAPGuardPriceForProductIdentifier(productIdentifier);
+    IAPGuardTrace(@"price_lookup price=%@", priceString ?: @"unknown");
     NSInteger remainingQuotaAfterConsume = -1;
     BOOL usedQuota = NO;
     if ([config consumeAllowanceForPrice:priceString remainingQuotaAfterConsume:&remainingQuotaAfterConsume usedQuota:&usedQuota]) {
+        IAPGuardTrace(@"decision=allow quota_used=%d remaining=%ld", usedQuota, (long)remainingQuotaAfterConsume);
         %orig(payment);
+        IAPGuardTrace(@"original_addPayment_return");
         return;
     }
+
+    IAPGuardTrace(@"decision=deny");
 
     NSString *remainingQuotaString = [config remainingQuotaDisplayStringForPrice:priceString];
     IAPGuardFailedTransaction *failedTransaction = [[IAPGuardFailedTransaction alloc] initWithPayment:payment];
@@ -436,9 +485,21 @@ static void IAPGuardNotifyFailedPayment(SKPaymentQueue *queue, IAPGuardFailedTra
 }
 
 - (void)finishTransaction:(SKPaymentTransaction *)transaction {
-    if (IAPGuardIsDeniedTransaction(transaction)) {
+    IAPGuardTrace(@"finishTransaction state=%ld local_denial=%d error_code=%ld", (long)transaction.transactionState,
+                  IAPGuardIsDeniedTransaction(transaction), (long)transaction.error.code);
+    if ([transaction isKindOfClass:[IAPGuardFailedTransaction class]]) {
         IAPGuardRemoveDeniedTransaction(transaction);
         return;
+    }
+
+    // mr finishes a cancellation before the game's observer receives our relay.
+    // A game observer may also finish it; send it to StoreKit only once.
+    if (IAPGuardMRCompatibility && transaction.transactionState == SKPaymentTransactionStateFailed &&
+        [transaction.error.domain isEqualToString:SKErrorDomain] && transaction.error.code == SKErrorPaymentCancelled) {
+        @synchronized (transaction) {
+            if (objc_getAssociatedObject(transaction, &kIAPGuardCancellationFinished)) return;
+            objc_setAssociatedObject(transaction, &kIAPGuardCancellationFinished, @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        }
     }
 
     %orig(transaction);
@@ -446,7 +507,30 @@ static void IAPGuardNotifyFailedPayment(SKPaymentQueue *queue, IAPGuardFailedTra
 
 %end
 
+%group IAPGuardMRCancellation
+%hook InsideAppStore
+- (void)paymentQueue:(SKPaymentQueue *)queue updatedTransactions:(NSArray *)transactions {
+    %orig(queue, transactions);
+    // Keep mr's handling intact. Only restore the missing user-cancel event.
+    NSArray *updates = [transactions copy];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        IAPGuardRelayCancelledPayments(queue, updates, IAPGuardObserverSnapshot(), self);
+    });
+}
+%end
+%end
+
 %ctor {
+    %init;
+    Class mrClass = NSClassFromString(@"InsideAppStore");
+    const char *mrImage = mrClass ? class_getImageName(mrClass) : NULL;
+    NSString *imageName = mrImage ? [[NSString stringWithUTF8String:mrImage] lastPathComponent] : nil;
+    IAPGuardMRCompatibility = [NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.levelinfinite.sgameGlobal"] &&
+        [imageName isEqualToString:@"mr.dylib"];
+    if (IAPGuardMRCompatibility) {
+        %init(IAPGuardMRCancellation);
+    }
+    IAPGuardTrace(@"loaded build=mr-cancel-compat-1 active=%d", IAPGuardMRCompatibility);
     [IAPGuardConfig sharedConfig];
     IAPGuardObservers();
     IAPGuardDeniedTransactionArray();

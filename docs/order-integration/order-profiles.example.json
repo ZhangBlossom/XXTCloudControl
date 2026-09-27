@@ -1,0 +1,11 @@
+[
+  {
+    "device_id": "REPLACE_WITH_XXTCLOUD_DEVICE_ID",
+    "bundle_id": "com.example.game",
+    "currency": "CNY",
+    "policy_path": "/REPLACE_WITH_ACTUAL_DEVICE_PATH/com.iapguard.runtime.plist",
+    "scripts_dir": "/REPLACE_WITH_ACTUAL_XXT_SCRIPTS_PATH",
+    "cleanup_script": "/REPLACE_WITH_VERIFIED_GAME_CLEANUP.lua",
+    "verified": false
+  }
+]

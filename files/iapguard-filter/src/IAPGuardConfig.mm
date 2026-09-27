@@ -1,8 +1,5 @@
 #import "IAPGuardConfig.h"
-#import <roothide.h>
-
-// Logical roothide path. jbroot() resolves this to the real .jbroot path on device.
-static NSString * const kIAPGuardRootFSConfigPath = @"/var/mobile/Library/Preferences/com.iapguard.runtime.plist";
+#import "IAPGuardDiagnostics.h"
 static NSInteger const kIAPGuardUnlimitedQuota = NSIntegerMax;
 
 @interface IAPGuardConfig ()
@@ -75,6 +72,7 @@ static NSInteger const kIAPGuardUnlimitedQuota = NSIntegerMax;
         }
 
         if (!self.enabled) {
+            IAPGuardTrace(@"decision=allow_disabled");
             return YES;
         }
 
@@ -84,10 +82,12 @@ static NSInteger const kIAPGuardUnlimitedQuota = NSIntegerMax;
         }
 
         if (!self.hasAllowedPriceQuotas) {
+            IAPGuardTrace(@"decision=legacy_whitelist price=%@", trimmed);
             return [self.allowedPrices containsObject:trimmed];
         }
 
         NSInteger remaining = [self.allowedPriceQuotas[trimmed] integerValue];
+        IAPGuardTrace(@"consume price=%@ before=%ld", trimmed, (long)remaining);
         if (remaining <= 0) {
             if (remainingQuotaAfterConsume) {
                 *remainingQuotaAfterConsume = 0;
@@ -98,6 +98,14 @@ static NSInteger const kIAPGuardUnlimitedQuota = NSIntegerMax;
         NSInteger newRemaining = remaining - 1;
         NSMutableDictionary<NSString *, NSNumber *> *updatedQuotas = [self.allowedPriceQuotas mutableCopy];
         updatedQuotas[trimmed] = @(newRemaining);
+        if (![self writeAllowedPriceQuotasLocked:updatedQuotas]) {
+            // Never forward a payment whose quota decrement was not persisted.
+            self.allowedPriceQuotas = @{};
+            if (remainingQuotaAfterConsume) {
+                *remainingQuotaAfterConsume = 0;
+            }
+            return NO;
+        }
         self.allowedPriceQuotas = [updatedQuotas copy];
 
         if (usedQuota) {
@@ -107,7 +115,6 @@ static NSInteger const kIAPGuardUnlimitedQuota = NSIntegerMax;
             *remainingQuotaAfterConsume = newRemaining;
         }
 
-        [self writeAllowedPriceQuotasLocked:self.allowedPriceQuotas];
         return YES;
     }
 }
@@ -166,11 +173,9 @@ static NSInteger const kIAPGuardUnlimitedQuota = NSIntegerMax;
 }
 
 - (NSString *)resolveConfigPath {
-    NSString *resolved = jbroot(kIAPGuardRootFSConfigPath);
-    if ([resolved isKindOfClass:[NSString class]] && resolved.length > 0) {
-        return resolved;
-    }
-    return kIAPGuardRootFSConfigPath;
+    // The injected game can atomically replace files inside its own container.
+    return [NSHomeDirectory() stringByAppendingPathComponent:
+        @"Library/Preferences/com.iapguard.runtime.plist"];
 }
 
 - (NSDate *)currentConfigModificationDate {
@@ -237,6 +242,8 @@ static NSInteger const kIAPGuardUnlimitedQuota = NSIntegerMax;
         self.hasLoaded = YES;
     }
 
+    IAPGuardTrace(@"config_loaded readable=%d enabled=%d quota_mode=%d", dictionary != nil, enabled, hasQuotas);
+
 }
 
 - (BOOL)isPriceAllowedLocked:(NSString *)priceString {
@@ -257,7 +264,7 @@ static NSInteger const kIAPGuardUnlimitedQuota = NSIntegerMax;
     return [self.allowedPrices containsObject:trimmed];
 }
 
-- (void)writeAllowedPriceQuotasLocked:(NSDictionary<NSString *, NSNumber *> *)quotas {
+- (BOOL)writeAllowedPriceQuotasLocked:(NSDictionary<NSString *, NSNumber *> *)quotas {
     NSString *path = self.resolvedConfigPath ?: [self resolveConfigPath];
     NSMutableDictionary *dictionary = [NSMutableDictionary dictionaryWithContentsOfFile:path];
     if (![dictionary isKindOfClass:[NSMutableDictionary class]]) {
@@ -268,8 +275,19 @@ static NSInteger const kIAPGuardUnlimitedQuota = NSIntegerMax;
     dictionary[@"allowedPriceQuotas"] = quotas ?: @{};
     [dictionary removeObjectForKey:@"allowedPrices"];
 
-    [dictionary writeToFile:path atomically:YES];
+    NSError *writeError = nil;
+    NSData *serialized = [NSPropertyListSerialization dataWithPropertyList:dictionary
+        format:NSPropertyListXMLFormat_v1_0 options:0 error:&writeError];
+    BOOL written = serialized && [serialized writeToFile:path options:NSDataWritingAtomic error:&writeError];
+    IAPGuardTrace(@"quota_write_error domain=%@ code=%ld underlying_code=%ld", writeError.domain,
+                  (long)writeError.code, (long)[writeError.userInfo[NSUnderlyingErrorKey] code]);
+    NSDictionary *readback = [NSDictionary dictionaryWithContentsOfFile:path];
+    BOOL matches = [readback[@"enabled"] boolValue] &&
+        [readback[@"allowedPriceQuotas"] isEqual:quotas];
+    IAPGuardTrace(@"quota_write success=%d readback_matches=%d", written,
+                  matches);
     self.lastModificationDate = [self currentConfigModificationDate];
+    return written && matches;
 }
 
 + (NSString *)normalizedPriceString:(NSString *)priceString {

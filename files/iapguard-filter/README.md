@@ -5,7 +5,7 @@ IAPGuard is a StoreKit 1 MobileSubstrate tweak that gates purchases by runtime p
 ## Behavior
 
 - The tweak records each app's StoreKit product table at runtime as `productIdentifier -> price`.
-- The allowed prices come from one global roothide plist.
+- The allowed prices come from a runtime plist inside the injected app’s data container.
 - If `enabled` is `false`, all `SKPayment` purchases are allowed.
 - If `enabled` is `true`, products are allowed by `allowedPriceQuotas` when present, otherwise by legacy `allowedPrices`.
 - With `allowedPriceQuotas`, a price is allowed only while its remaining count is greater than `0`; the count is decremented when `addPayment:` is allowed.
@@ -14,17 +14,15 @@ IAPGuard is a StoreKit 1 MobileSubstrate tweak that gates purchases by runtime p
 
 ## Runtime config
 
-Logical runtime config path:
+Runtime config path relative to `NSHomeDirectory()` (the game data container):
 
 ```text
-/var/mobile/Library/Preferences/com.iapguard.runtime.plist
+Library/Preferences/com.iapguard.runtime.plist
 ```
 
-In roothide this is resolved with `jbroot()` to a real path similar to:
+The plugin reads and atomically updates this file inside its own app container. The controller must resolve the game’s current data container (for example, XXTouch `app.data_path(bundle_id)`) and write the same file before launching the game. Do not apply `jbroot()` to this path.
 
-```text
-/var/containers/Bundle/Application/.jbroot-XXXX/var/mobile/Library/Preferences/com.iapguard.runtime.plist
-```
+Migration: the old `.jbroot-*/var/mobile/Library/Preferences` policy is no longer read. Stop the game, change the device profile’s `policy_path` to the game-container path, and write a fresh order policy. Container UUIDs may change after reinstall. The `.deb` intentionally contains no runtime policy; keep the repository plist as a sample only.
 
 Config format:
 
@@ -42,7 +40,7 @@ Config format:
 </dict>
 ```
 
-Before each purchase decision, IAPGuard checks the config file modification time and reloads it if changed. When a quota-controlled purchase is allowed, the remaining count is written back to the same plist immediately.
+Before each purchase decision, IAPGuard checks the config file modification time and reloads it if changed. When a quota-controlled purchase is allowed, the remaining count must be atomically written and read back successfully before forwarding payment. Write failure denies the purchase and clears in-memory quotas. Counts represent admitted purchase attempts, not successful payments; cancellation does not refund quota.
 
 ## tidevice flow
 

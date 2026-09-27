@@ -181,6 +181,11 @@ func main() {
 	r.Use(gin.Recovery())
 	r.Use(corsMiddleware())
 	r.Use(apiAuthMiddleware())
+	stopOrders, orderErr := initOrderHTTP(r)
+	if orderErr != nil {
+		log.Fatalf("Order integration initialization failed: %v", orderErr)
+	}
+	defer stopOrders()
 
 	// WebSocket route
 	r.GET("/api/ws", handleWebSocketConnection)

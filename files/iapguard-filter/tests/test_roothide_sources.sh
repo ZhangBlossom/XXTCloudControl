@@ -14,15 +14,20 @@ grep -F 'TWEAK_NAME = zzzIAPGuard' "$PROJECT_DIR/Makefile" >/dev/null || {
   exit 1
 }
 
-grep -F '#import <roothide.h>' "$PROJECT_DIR/src/IAPGuardConfig.mm" >/dev/null || {
-  echo "config loader does not import roothide.h" >&2
+grep -F 'NSHomeDirectory()' "$PROJECT_DIR/src/IAPGuardConfig.mm" >/dev/null || {
+  echo "config loader does not resolve the app container" >&2
   exit 1
 }
 
-grep -F 'jbroot(kIAPGuardRootFSConfigPath)' "$PROJECT_DIR/src/IAPGuardConfig.mm" >/dev/null || {
-  echo "config loader does not resolve config path through jbroot()" >&2
+grep -F 'Library/Preferences/com.iapguard.runtime.plist' "$PROJECT_DIR/src/IAPGuardConfig.mm" >/dev/null || {
+  echo "config loader does not use the app preferences runtime path" >&2
   exit 1
 }
+
+if grep -F 'jbroot(' "$PROJECT_DIR/src/IAPGuardConfig.mm" >/dev/null; then
+  echo "runtime policy must not resolve outside the app container" >&2
+  exit 1
+fi
 
 grep -F 'transactionReceipt' "$PROJECT_DIR/src/IAPGuardFailedTransaction.mm" >/dev/null || {
   echo "fake transaction does not implement transactionReceipt" >&2
